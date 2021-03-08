@@ -1,5 +1,1 @@
-## Tarefas importantes
-
-## Adicionar categorias
-
-## Adicionar subcategorias
+## A fazer
