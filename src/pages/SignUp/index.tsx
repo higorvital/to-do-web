@@ -62,7 +62,7 @@ const SignUp: React.FC = () => {
         <Content>
           <AnimatedContent>
             <ContentBox>
-              <h1>Criar sua conta</h1>
+              <h1>Criar sua contaa</h1>
 
               <Form ref={formRef} onSubmit={handleSubmit}>
                 <Input icon={FiUser} type="name" name="name" placeholder="Nome" />
