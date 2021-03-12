@@ -1,3 +1,5 @@
+import { isAfter, parseISO } from 'date-fns';
+import { addHours } from 'date-fns/esm';
 import React, {createContext, useCallback, useContext, useState} from 'react';
 import api from '../services/api';
 
@@ -27,8 +29,21 @@ const AuthProvider: React.FC = ({children}) => {
 
         const token = localStorage.getItem('@2Do:token');
         const user = localStorage.getItem('@2Do:user');
+        const lastAccess = localStorage.getItem('@2Do:lastAccess');
 
-        if(token && user){
+        if(token && user && lastAccess){
+
+            let lastAccessParsed = parseISO(JSON.parse(lastAccess));
+            lastAccessParsed = addHours(lastAccessParsed, 24);
+
+            if(isAfter(new Date(), lastAccessParsed)){
+
+                localStorage.removeItem('@2Do:token');
+                localStorage.removeItem('@2Do:user');
+                localStorage.removeItem('@2Do:lastAccess');
+
+                return {} as AuthState;
+            }
 
             api.defaults.headers.authorization = `Bearer ${JSON.parse(token)}`;
 
@@ -53,6 +68,7 @@ const AuthProvider: React.FC = ({children}) => {
 
         api.defaults.headers.authorization = `Bearer ${token}`;
 
+        localStorage.setItem('@2Do:lastAccess', JSON.stringify(new Date()));
         localStorage.setItem('@2Do:token', JSON.stringify(token));
         localStorage.setItem('@2Do:user', JSON.stringify(user));
 
@@ -64,6 +80,7 @@ const AuthProvider: React.FC = ({children}) => {
 
         localStorage.removeItem('@2Do:token');
         localStorage.removeItem('@2Do:user');
+        localStorage.removeItem('@2Do:lastAccess');
 
         setData({} as AuthState);
     },[]);

@@ -9,6 +9,7 @@ import { Container, Content, Background, ContentBox, AnimatedContent} from './st
 import Button from '../../components/Button';
 import api from '../../services/api';
 import { useHistory } from 'react-router';
+import { toast } from 'react-toastify';
 
 interface SignUpCredentials{
   name: string;
@@ -29,10 +30,10 @@ const SignUp: React.FC = () => {
     try {
 
       const schema = Yup.object().shape({
-        name: Yup.string().required(),
-        email: Yup.string().email().required(),
-        password: Yup.string().required(),
-        password_confirmation: Yup.string().required().oneOf([Yup.ref('password')])
+        name: Yup.string().required("Nome obrigatório"),
+        email: Yup.string().email("E-mail inválido").required("E-mail obrigatório"),
+        password: Yup.string().required("Senha obrigatória"),
+        password_confirmation: Yup.string().required("Senha de senha obrigatória").oneOf([Yup.ref('password')],"Senha e confimação não batem")
       });
 
       await schema.validate(data, {
@@ -45,13 +46,11 @@ const SignUp: React.FC = () => {
 
     } catch (err) {
 
-      console.log('deu erro');
 
-      if(err instanceof Yup.ValidationError){
-        // const errors = getValidationErrors(err);
-
-        return;
-      }
+      toast(err.message, {
+        autoClose: 3000,
+        type: "error"
+      });
     }
 
   },[history]);

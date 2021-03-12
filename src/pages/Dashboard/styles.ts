@@ -87,163 +87,48 @@ export const Category = styled.div<CategoryProps>`
     }
 
     ul {
-        overflow: hidden;
-        list-style: none;
-
-        max-height: 0;
-        transition: 0.5s;
-
         ${props => props.isActive && css`
             max-height: 1000px;
         `}
-
-        li {
-
-            > div{
-                width: 12px;
-                height: 12px;
-                border: 2px solid #000;
-                border-radius: 50%;
-                margin-right: 10px;
-
-            }
-
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            
-            & + li {
-                /* margin-top: 20px; */
-            }
-
-            /* svg {
-                margin-right: 10px;
-            } */
-            
-        }
-    }
-`
-
-
-export const Center = styled.div`
-    width: 50%;
-    padding: 0 15px;
-    position: relative;
-
-`
-
-export const Tasks = styled.div`
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    grid-gap: 20px;
-    width: 100%;
-
-`
-
-export const Title = styled.h1`
-
-    display: flex;
-    align-items: center;
-    font-size: 24px;
-
-    span {
-        font-size: 12px;
-        color: #bfc4d8;
-        margin-left: 10px;
     }
 
 `
 
-interface TaskProps{
-    isLate: boolean;
-    isCompleted: boolean;
-}
+export const Subcategory = styled.ul`
 
-export const Task = styled.div<TaskProps>`
-    padding: 20px;
-    /* height: 250px; */
+    overflow: hidden;
+    list-style: none;
+
+    max-height: 0;
+    transition: 0.5s;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    box-shadow: 0px 0px 8px #00000014;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    position: relative;
+    flex-direction: column;
 
-    ${props => props.isLate && css`
-        box-shadow: 0px 0px 8px #ff000045;
-    `}
+    li {
 
-    ${props => props.isCompleted && css`
-        border-color: green;
-    `}
-
-    > div{
-        display: flex;
-        position: relative;
-    }
-
-    button {
-        margin-left: auto;
-        background: transparent;
-        color: #bfc4d8;
-        border: 0;
-        overflow: hidden;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-
-        > div{
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-    }
-`
-
-
-export const TaskTop = styled.div`
-
-    display: flex;
-    align-items: end;
-
-`
-
-export const TaskSubcategory = styled.div`
-    height: 40px;
-    width: 40px;
-    border: 2px solid #4176f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: #fff;
-    background: #4176f5;
-`
-
-export const TaskTitle = styled.div`
-
-    margin-left: 10px;
-    
-    span {
-        font-size: 12px;
-        color: #bfc4d8;
-        font-weight: 500;
         display: flex;
         align-items: center;
-
-        svg {
-            color: #4176f5;
-            margin-right: 5px;
-        }
+        padding: 10px 0;
+    
+        
     }
 
+
 `
+
+
+export const IconSubcategory = styled.div`
+
+    width: 12px;
+    height: 12px;
+    border: 2px solid #000;
+    border-radius: 50%;
+    margin-right: 10px;
+    margin-left: 0 !important;
+
+`
+
+
 
 export const RightBar = styled.div`
     /* width: 30%; */
@@ -295,14 +180,12 @@ export const Hours = styled.ul`
 
 `
 
-export const ButtonPlusTask = styled.button`
+export const ButtonPlusSubcategory = styled.button`
     overflow: hidden;
     color: #fff;
-    position: absolute;
     border: 0;
-    top: 0;
-    right: 15px;
     border-radius: 50%;
+    margin: 10px auto;
 
     svg {
         background: #4176f5;
@@ -320,17 +203,70 @@ export const ButtonPlusTask = styled.button`
     }
 `
 
+export const ButtonPlusCategory = styled.button`
+    border: 0;
+    margin: 20px auto 0;
+    background: #4176f5;
+    border-radius: 20px;
+    color: #fff;
+
+    > div {
+        width: 100%;
+        height: 100%;
+        padding: 10px 5px;
+        border-radius: 20px;
+
+        display: flex;
+        align-items: center;
+
+        svg {
+            margin-right: 2px;
+        }
+    }
+
+`
+
 export const RippleEffect = styled(Ripple)`
     border-radius: 50%;
     width: 100%;
 
 `
 
-interface ToggleTaskProps{
+
+
+interface ToggleSubcategoryProps{
     isActive: boolean;
 }
 
-export const ToggleTask = styled.div<ToggleTaskProps>`
+export const ToggleSubcategoryContainer = styled.div`
+
+    position: relative;
+    margin-left: auto;
+
+    > button {
+        margin-left: auto;
+        background: transparent;
+        color: #bfc4d8;
+        border: 0;
+        overflow: hidden;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+
+        > div{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+    }
+
+`
+
+export const ToggleSubcategory = styled.div<ToggleSubcategoryProps>`
+
     display: flex;
     flex-direction: column;
     align-items: end;
@@ -340,7 +276,7 @@ export const ToggleTask = styled.div<ToggleTaskProps>`
     box-shadow: 0px 0px 8px #00000014;
     padding: 10px 0;
     top: 110%;
-    left: 50%;
+    left: -80%;
     z-index: -1;
     opacity: 0;
     transition: 0.3s;
@@ -356,9 +292,11 @@ export const ToggleTask = styled.div<ToggleTaskProps>`
         margin-left: 0;
         border-radius: 0;
         font-size: 14px;
+        border: 0;
+        background: transparent;
+        color: #bfc4d8;
 
         div {
-            text-align: right;
             justify-content: end;
             width: 100%;
             padding: 2px 10px;
@@ -447,36 +385,5 @@ export const Calendar = styled.aside`
     border-radius: 10px;
     color: #fff !important;
   }
-
-`
-
-interface TaskCompletedMessageProps {
-    isCompleted: boolean;
-}
-
-export const TaskCompletedMessage = styled.div<TaskCompletedMessageProps>`
-    position: absolute !important;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    ${props => !props.isCompleted && css`
-        display: none !important;
-    `}
-
-    font-size: 24px;
-    color: green;
-    width: 200px;
-    margin: 0 auto;
-    
-    svg {
-        margin-right: 10px;
-    }
-
 
 `

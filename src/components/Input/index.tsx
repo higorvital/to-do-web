@@ -40,9 +40,9 @@ const Input: React.FC<InputProps> = ({name,icon: Icon,...rest}) => {
 
     },[]);
 
-    useEffect(()=>{
-        console.log("error: "+error);
-    },[error]);
+    // useEffect(()=>{
+    //     console.log("error: "+error);
+    // },[error]);
 
     return (
         <Container isFocused={isFocused} isFilled={isFilled} isErrored={!!error} >
@@ -54,7 +54,7 @@ const Input: React.FC<InputProps> = ({name,icon: Icon,...rest}) => {
                 onBlur={handleBlur}
                 {...rest} 
             />
-            {error}
+            {/* {error} */}
         </Container>
     );
 }

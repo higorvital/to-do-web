@@ -6,9 +6,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>{
     
 }
 
-const Button: React.FC <ButtonProps> = ({children}) => {
+const Button: React.FC <ButtonProps> = ({children, type="submit"}) => {
   return (
-      <Container type="submit">
+      <Container type={type}>
           {children}
       </Container>
   );

@@ -9,6 +9,7 @@ import { Container, Content, ContentBox, AnimatedContent} from './styles';
 import Button from '../../components/Button';
 import Header from '../../components/Header';
 import { useAuth } from '../../hooks/auth';
+import { toast } from 'react-toastify';
 
 interface ProfileCredentials{
   name: string;
@@ -30,8 +31,8 @@ const Profile: React.FC = () => {
     try {
 
       const schema = Yup.object().shape({
-        name: Yup.string().required(),
-        email: Yup.string().email().required(),
+        name: Yup.string().required("Nome obrigatório"),
+        email: Yup.string().email("E-mail inválido").required("E-mail obrigatório"),
         password: Yup.string(),
         // password: Yup.string().when({
         //     is: true,
@@ -39,12 +40,12 @@ const Profile: React.FC = () => {
         // }),
         password_confirmation: Yup.string().when('password', {
             is: (val: boolean) => val,
-            then: Yup.string().required().oneOf([Yup.ref('password')]).min(6).max(16),
+            then: Yup.string().required().oneOf([Yup.ref('password')], "Informe a confirmação de senha").min(6, "Senha mínima de 6 caracteres").max(16, "Senha máxima de 16 caracteres"),
             otherwise: Yup.string()
         }),
         old_password: Yup.string().when('password', {
             is: (val: boolean) => val,
-            then: Yup.string().required(),
+            then: Yup.string().required("Informe a senha antiga"),
             otherwise: Yup.string()
         })
       });
@@ -55,13 +56,10 @@ const Profile: React.FC = () => {
 
     } catch (err) {
 
-      console.log('deu erro');
-
-      if(err instanceof Yup.ValidationError){
-        // const errors = getValidationErrors(err);
-
-        return;
-      }
+      toast(err.message, {
+        autoClose: 3000,
+        type: "error"
+      });
     }
 
   },[]);

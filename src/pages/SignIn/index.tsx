@@ -8,6 +8,7 @@ import * as Yup from 'yup';
 import { Container, Content, Background, ContentBox, AnimatedContent} from './styles';
 import Button from '../../components/Button';
 import { useAuth } from '../../hooks/auth';
+import { toast } from 'react-toastify';
 
 interface SignInCredentials{
   email: string;
@@ -26,8 +27,8 @@ const SignIn: React.FC = () => {
     try {
 
       const schema = Yup.object().shape({
-        email: Yup.string().email().required(),
-        password: Yup.string().required()
+        email: Yup.string().email("E-mail inválido").required("E-mail obrigatório"),
+        password: Yup.string().required("Senha obrigatória")
       });
 
       await schema.validate(data, {
@@ -40,11 +41,11 @@ const SignIn: React.FC = () => {
 
     } catch (err) {
 
-      if(err instanceof Yup.ValidationError){
-        // const errors = getValidationErrors(err);
+      toast(err.message, {
+        autoClose: 3000,
+        type: "error"
+      });
 
-        return;
-      }
     }
 
   },[signIn]);

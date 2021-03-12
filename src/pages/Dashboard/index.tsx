@@ -1,34 +1,34 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Header from '../../components/Header';
-import {FaThLarge, FaStar, FaCheckSquare, FaChevronUp, FaEllipsisV, FaRegClock} from 'react-icons/fa'
-import {FiPlus} from 'react-icons/fi'
+import {FaThLarge, FaStar, FaCheckSquare, FaChevronUp, FaEllipsisV} from 'react-icons/fa'
+import {FiEdit, FiPlus, FiTrash} from 'react-icons/fi'
 import DatePicker, { DayModifiers } from 'react-day-picker';
 import Ripples from 'react-ripples';
 import 'react-day-picker/lib/style.css';
-import { format,  isBefore, addDays } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
+import { isBefore, addDays } from 'date-fns';
+
 
 import { 
     Container,
     SideBar,
     Menu,
     Category,
-    Tasks,
-    Task,
-    Title,
-    TaskSubcategory,
-    TaskTitle,
-    Center,
+    // Tasks,
     RightBar,
-    ButtonPlusTask,
     MenuItem,
     RippleEffect,
     Calendar,
-    ToggleTask,
-    TaskCompletedMessage
+    ButtonPlusCategory,
+    ButtonPlusSubcategory,
+    IconSubcategory,
+    ToggleSubcategory,
+    Subcategory,
+    ToggleSubcategoryContainer
 } from './styles';
-import TaskModal from '../../components/TaskModal';
+import CategoryModal from '../../components/CategoryModal';
 import api from '../../services/api';
+import SubcategoryModal from '../../components/SubcategoryModal';
+import Tasks from '../../components/Tasks';
 
 interface CategoryDTO{
     id: string;
@@ -39,6 +39,8 @@ interface CategoryDTO{
 interface SubcategoryDTO{
     id: string;
     name: string;
+    category_id: string;
+    category: Omit<CategoryDTO, 'subcategories'>;
 }
 
 interface TaskDTO {
@@ -54,32 +56,28 @@ interface TaskDTO {
     subcategory?: SubcategoryDTO;
 }
 
-interface TaskFormProps{
-    title: string;
-    day: number;
-    month: number;
-    year: number;
-    hour: number;
-    minute: number;
-}
 
 const Dashboard: React.FC = () => {
 
-    const [activeCategory, setActiveCategory] = useState("");
     const [activeFilter, setActiveFilter] = useState("Todos");
-    const [isModalOpen, setModalOpen] = useState(false);
-    const [categories, setCategories] = useState<CategoryDTO[]>([]);
+    const [activeCategory, setActiveCategory] = useState("");
     const [tasks, setTasks] = useState<TaskDTO[]>([]);
+    const [categories, setCategories] = useState<CategoryDTO[]>([]);
     const [selectedDate, setSelectedDate] = useState(new Date());
-    // const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [toggleTask, setToggleTask] = useState<TaskDTO>({} as TaskDTO);
-    const [editTask, setEditTask] = useState<TaskDTO| null>(null);
+
+    const [isCategoryModalOpen, setCategoryModalOpen] = useState(false);
+    const [isSubcategoryModalOpen, setSubcategoryModalOpen] = useState(false);
+
+    const [categorySubcategory, setCategorySubcategory] = useState<Omit<CategoryDTO, 'subcategories'>>({} as Omit<CategoryDTO, 'subcategories'>);
+
+    const [toggleSubcategory, setToggleSubcategory] = useState<SubcategoryDTO>({} as SubcategoryDTO);
+    const [editSubcategory, setEditSubcategory] = useState<SubcategoryDTO | null>(null);
 
     useEffect(()=>{
 
         async function getCategories(){
 
-            const categoriesResponse = await api.get('/categories');
+            const categoriesResponse = await api.get<CategoryDTO[]>('/categories');
             setCategories(categoriesResponse.data);
             
         }
@@ -88,54 +86,56 @@ const Dashboard: React.FC = () => {
 
     },[]);
 
+    const handleAllTasks = useCallback(async ()=>{
+
+        setActiveFilter("Todos");
+
+        const tasksResponse = await api.get<TaskDTO[]>('/tasks', {
+            params: {
+                day: selectedDate.getDate(),
+                month: selectedDate.getMonth() + 1,
+                year: selectedDate.getFullYear(),
+            }
+        });
+
+        const tasksHourFormatted = tasksResponse.data.map((task)=>{
+
+            if(task.time){
+                task.time = task.time.slice(0, -3);
+
+                let taskTimeFormatted = new Date(task.date);
+                taskTimeFormatted = addDays(taskTimeFormatted, 1);
+                taskTimeFormatted.setHours(Number(task.time.split(":")[0]))
+                taskTimeFormatted.setMinutes(Number(task.time.split(":")[1]))
+                task.late = isBefore(taskTimeFormatted, new Date()) && !task.completed;
+
+            }
+            return task;
+        });
+
+        setTasks(tasksHourFormatted);
+
+    },[selectedDate, setTasks])
+
     useEffect(()=>{
+        
+        handleAllTasks();
 
-        async function getTasks(){
+    },[handleAllTasks]);
 
-            const tasksResponse = await api.get<TaskDTO[]>('/tasks', {
-                params: {
-                    day: selectedDate.getDate(),
-                    month: selectedDate.getMonth() + 1,
-                    year: selectedDate.getFullYear(),
-                }
-            });
+    const handleNewCategory = useCallback(()=>{
 
-            const tasksHourFormatted = tasksResponse.data.map((task)=>{
+        setCategoryModalOpen(!isCategoryModalOpen);
 
-                if(task.time){
-                    task.time = task.time.slice(0, -3);
+    },[isCategoryModalOpen]);
 
-                    let taskTimeFormatted = new Date(task.date);
-                    taskTimeFormatted = addDays(taskTimeFormatted, 1);
-                    // let taskFormatted = format(new Date(taskDayAdded), 'yyyy-MM-dd');
-                    
-                    // if(taskFormatted === format(new Date(), 'yyyy-MM-dd')){       
-                        taskTimeFormatted.setHours(Number(task.time.split(":")[0]))
-                        taskTimeFormatted.setMinutes(Number(task.time.split(":")[1]))
-                        task.late = isBefore(taskTimeFormatted, new Date()) && !task.completed;
-                    // }
+    const handleNewSubcategory = useCallback((category: CategoryDTO)=>{
 
-                }
-                return task;
-            });
+        setSubcategoryModalOpen(!isSubcategoryModalOpen);
 
-            setTasks(tasksHourFormatted);
+        setCategorySubcategory(category);
 
-        }
-
-        getTasks();
-
-    },[selectedDate]);
-
-    const handleNewTask = useCallback(()=>{
-
-        if(isModalOpen){
-            setEditTask({} as TaskDTO);
-        }
-
-        setModalOpen(!isModalOpen);
-
-    },[isModalOpen]);
+    },[isSubcategoryModalOpen]);
 
     const handleClickCategory = useCallback((id: string)=>{
 
@@ -143,11 +143,6 @@ const Dashboard: React.FC = () => {
 
     },[]);
 
-    const handleClickMenuItem = useCallback((item: string)=>{
-
-        setActiveFilter(item);
-
-    },[]);
 
     const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
 
@@ -163,156 +158,225 @@ const Dashboard: React.FC = () => {
 
     }, []);
 
-    const selectedDateFormatted = useMemo(()=>{
-    
-        return format(selectedDate, "dd 'de' MMMM '|' cccc", {
-            locale: ptBR
+    const handleToggleSubcategory = useCallback((subcategory: SubcategoryDTO)=>{
+
+        setToggleSubcategory(state => state.id !== subcategory.id ? subcategory : {} as SubcategoryDTO);
+
+    },[]);
+
+    const toggleCategoryModal = useCallback((open: boolean)=>{
+
+        setCategoryModalOpen(open);
+
+    },[]);
+
+    const toggleSubcategoryModal = useCallback((open: boolean)=>{
+
+        setSubcategoryModalOpen(open);
+
+    },[]);
+
+    const handleEditSubcategory = useCallback((subcategory: SubcategoryDTO)=>{
+
+        setEditSubcategory(subcategory);
+
+        setToggleSubcategory({} as SubcategoryDTO);
+
+        toggleSubcategoryModal(true);
+
+    },[toggleSubcategoryModal]);
+
+
+    const updateSubcategory = useCallback(async (subcategory: SubcategoryDTO)=>{
+            
+        const response = await api.put(`/subcategories/${subcategory.id}`, {
+            name: subcategory.name,
+        });
+
+        const updatedCategories = categories.map(category => {
+            if(category.id === subcategory.category_id){
+                
+                category.subcategories = category.subcategories
+                .map(sub=>sub.id === subcategory.id ? response.data : sub);
+
+            }
+
+            return category;
         })
 
-    },[selectedDate]);
+        setCategories(updatedCategories);
 
-    const handleToggleTask = useCallback((task: TaskDTO)=>{
+    },[setCategories, categories]);
 
-        setToggleTask(state => state.id !== task.id ? task : {} as TaskDTO);
-
-    },[]);
-
-    const editTaskFormatted = useMemo(()=>{
-
-        if(editTask){
-    
-            let taskDate = editTask.date.split("-");
-    
-            let task = {};
-    
-            task =  {
-                ...editTask,
-                day: taskDate[2],
-                month: taskDate[1],
-                year: taskDate[0]
-            }
-    
-            if(editTask.time){
-                let taskTime = editTask.time.split(":");
-        
-                task = {
-                    ...task,
-                    hour: taskTime[0],
-                    minute: taskTime[1]
-                }
-            }
-    
-            return task as TaskFormProps;
-        }
-    
-        return null;
-      
-    },[editTask]);
-
-    const toggleModal = useCallback((open: boolean)=>{
-
-        if(!open){
-            setEditTask(null);
-        }
-
-        setModalOpen(open);
-
-    },[]);
-
-    const handleEditTask = useCallback((task: TaskDTO)=>{
-
-        setEditTask(task);
-
-        setToggleTask({} as TaskDTO);
-
-        toggleModal(true);
-
-    },[toggleModal]);
-
-    const createTask = useCallback(async (task)=>{
+    const createCategory = useCallback(async (category)=>{
             
-        const response = await api.post<TaskDTO>('/tasks', {
-            title: task.title,
-            date: {
-                day: task.day,
-                month: task.month,
-                year: task.year,
-            },
-            time: {
-                hour: task.hour,
-                minute: task.minute,
+        const response = await api.post<CategoryDTO>('/categories', {
+            name: category.name
+        });
+
+        setCategories([...categories, response.data]);
+
+    },[setCategories, categories]);
+
+    const createSubcategory = useCallback(async (subcategory)=>{
+            
+        const response = await api.post<SubcategoryDTO>('/subcategories', {
+            name: subcategory.name,
+            category_id: subcategory.category_id
+        });
+
+        const updatedCategories = categories.map(category => {
+            if(category.id === subcategory.category_id){
+                category.subcategories.push(response.data);
+            }
+
+            return category;
+        })
+
+        setCategories(updatedCategories);
+
+    },[setCategories, categories]);
+
+    const handleDeleteSubcategory = useCallback(async(subcategory: SubcategoryDTO)=>{
+
+        await api.delete(`/subcategories/${subcategory.id}`);
+
+        const updatedCategories = categories.map(category => {
+            if(category.id === subcategory.category_id){
+                
+                category.subcategories = category.subcategories
+                .filter(sub=>sub.id !== subcategory.id);
+
+            }
+
+            return category;
+        })
+
+        setCategories(updatedCategories);
+
+    },[categories]);
+
+    const handleTasksBySubcategory = (async (subcategory_id: string)=>{
+
+        setActiveFilter("Todos");
+
+        const response = await api.get<TaskDTO[]>(`/subcategories/${subcategory_id}/tasks`, {
+            params: {
+                day: selectedDate.getDate(),
+                month: selectedDate.getMonth() + 1,
+                year: selectedDate.getFullYear(),
             }
         });
 
-        let createdTask = response.data;
+        const tasksFormatted = response.data.map((task)=>{
 
-        if(createdTask.time){
-            createdTask.hourFormatted = createdTask.time.slice(0, -3);
-        }
+            if(task.time){
+                task.time = task.time.slice(0, -3);
 
-        setTasks([...tasks, createdTask]);
+                let taskTimeFormatted = new Date(task.date);
+                taskTimeFormatted = addDays(taskTimeFormatted, 1);
+                taskTimeFormatted.setHours(Number(task.time.split(":")[0]))
+                taskTimeFormatted.setMinutes(Number(task.time.split(":")[1]))
+                task.late = isBefore(taskTimeFormatted, new Date()) && !task.completed;
 
-    },[setTasks, tasks]);
+            }
+            return task;
+        });
 
-    const updateTask = useCallback(async (task)=>{
-            
-        const response = await api.put(`/tasks/${task.id}`, {
-            title: task.title,
-            date: {
-                day: task.day,
-                month: task.month,
-                year: task.year,
-            },
-            time: {
-                hour: task.hour,
-                minute: task.minute,
+        setTasks(tasksFormatted);
+
+    });
+
+    const handleImportantTasks = (async ()=>{
+
+        setActiveFilter("Importantes");
+
+        const response = await api.get<TaskDTO[]>(`/tasks/important`, {
+            params: {
+                day: selectedDate.getDate(),
+                month: selectedDate.getMonth() + 1,
+                year: selectedDate.getFullYear(),
             }
         });
 
-        const updatedTasks = tasks.map(t => t.id === task.id ? response.data : t);
+        const tasksFormatted = response.data.map((task)=>{
 
-        setTasks(updatedTasks);
+            if(task.time){
+                task.time = task.time.slice(0, -3);
 
-    },[setTasks, tasks]);
+                let taskTimeFormatted = new Date(task.date);
+                taskTimeFormatted = addDays(taskTimeFormatted, 1);
+                taskTimeFormatted.setHours(Number(task.time.split(":")[0]))
+                taskTimeFormatted.setMinutes(Number(task.time.split(":")[1]))
+                task.late = isBefore(taskTimeFormatted, new Date()) && !task.completed;
 
-    const handleCompleteTask = useCallback(async (task)=>{
-            
-        const response = await api.patch(`/tasks/${task.id}/completed`);
+            }
+            return task;
+        });
 
-        const updatedTasks = tasks.map(t => t.id === task.id ? response.data : t);
+        setTasks(tasksFormatted);
 
-        setTasks(updatedTasks);
+    });
 
-        setToggleTask({} as TaskDTO);
+    const handleCompletedTasks = (async ()=>{
 
-    },[setTasks, tasks]);
+        setActiveFilter("Completos");
 
-    const handleDelete = useCallback(async(task)=>{
+        const response = await api.get<TaskDTO[]>(`/tasks/completed`, {
+            params: {
+                day: selectedDate.getDate(),
+                month: selectedDate.getMonth() + 1,
+                year: selectedDate.getFullYear(),
+            }
+        });
 
-        await api.delete(`/tasks/${task.id}`);
+        const tasksFormatted = response.data.map((task)=>{
 
-        const updatedTasks = tasks.filter(t =>t.id !== task.id);
+            if(task.time){
+                task.time = task.time.slice(0, -3);
 
-        setTasks(updatedTasks);
+                let taskTimeFormatted = new Date(task.date);
+                taskTimeFormatted = addDays(taskTimeFormatted, 1);
+                taskTimeFormatted.setHours(Number(task.time.split(":")[0]))
+                taskTimeFormatted.setMinutes(Number(task.time.split(":")[1]))
+                task.late = isBefore(taskTimeFormatted, new Date()) && !task.completed;
 
-    },[tasks]);
+            }
+            return task;
+        });
+
+        setTasks(tasksFormatted);
+
+    });
 
     return (
         <>
-            <TaskModal task={editTaskFormatted} isOpen={isModalOpen} toggleModal={toggleModal} createTask={createTask} updateTask={updateTask} />
+            <SubcategoryModal 
+                isOpen={isSubcategoryModalOpen} 
+                toggleModal={toggleSubcategoryModal} 
+                createSubcategory={createSubcategory} 
+                category={categorySubcategory} 
+                updateSubcategory={updateSubcategory} 
+                subcategory={editSubcategory} />
+
+            <CategoryModal 
+                isOpen={isCategoryModalOpen} 
+                toggleModal={toggleCategoryModal} 
+                createCategory={createCategory}/>
+
             <Header />
             <Container>
                 <SideBar>
                     <Menu>
-                        <MenuItem onClick={()=> handleClickMenuItem("Todos")} isActive={activeFilter === "Todos" ? true : false} >
+                        <MenuItem onClick={handleAllTasks} isActive={activeFilter === "Todos" ? true : false} >
                             <FaThLarge  size={16} />
                             Todos
                         </MenuItem>
-                        <MenuItem onClick={()=> handleClickMenuItem("Importantes")} isActive={activeFilter === "Importantes" ? true : false} >
+                        <MenuItem onClick={handleImportantTasks} isActive={activeFilter === "Importantes" ? true : false} >
                             <FaStar  size={16} />
                             Importantes
                         </MenuItem>
-                        <MenuItem onClick={()=> handleClickMenuItem("Completos")} isActive={activeFilter === "Completos" ? true : false} >
+                        <MenuItem onClick={handleCompletedTasks} isActive={activeFilter === "Completos" ? true : false} >
                             <FaCheckSquare  size={16} />
                             Completos
                         </MenuItem>
@@ -322,78 +386,58 @@ const Dashboard: React.FC = () => {
                             categories.map(category => (
                                 <Category isActive={activeCategory === category.id ? true : false} key={category.id}>
                                     <h4 onClick={()=> handleClickCategory(category.id)}>{category.name} <FaChevronUp size={10} /> </h4>
-                                    <ul >
-                                    {
-                                        category.subcategories.map(subcategory => (
-                                            <li key={subcategory.id}>
-                                                <div></div>
-                                                {subcategory.name}
-                                            </li>
-                                        ))
-                                    }
-                                    </ul>
-                                </Category>    
-                            ))
-                        }
-                    </div>                    
-                </SideBar>
-                <Center>
-                    <Title>
-                        Tarefas
-                        <span>{selectedDateFormatted}</span>
-                    </Title>
-                    <ButtonPlusTask>
-                        <RippleEffect onClick={handleNewTask}>
-                            <FiPlus size={24} />
-                        </RippleEffect>
-                    </ButtonPlusTask>
-                    <Tasks>
-                        {
-                            tasks.map(task => (
-                                <Task key={task.id} isLate={task.late} isCompleted={task.completed}>
-                                    <div>
+                                        <Subcategory >
                                         {
-                                            task.subcategory &&
-                                            <TaskSubcategory>
-                                                B
-                                            </TaskSubcategory>
+                                            category.subcategories?.map(subcategory => (
+                                                <li key={subcategory.id}>
+                                                    <IconSubcategory></IconSubcategory>
+                                                    <span onClick={()=> handleTasksBySubcategory(subcategory.id)}>
+                                                        {subcategory.name}
+                                                    </span>
+                                                    <ToggleSubcategoryContainer>
+                                                        <button>
+                                                            <Ripples onClick={()=>handleToggleSubcategory(subcategory)}>
+                                                                <FaEllipsisV size={16} />
+                                                            </Ripples>
+                                                        </button>
+                                                        <ToggleSubcategory isActive={toggleSubcategory.id === subcategory.id ? true : false}>
+                                                            <button>
+                                                                <Ripples onClick={()=>handleEditSubcategory(subcategory)}>
+                                                                {/* <Ripples> */}
+                                                                    <FiEdit size={16} />
+                                                                </Ripples>
+                                                            </button>
+                                                            <button>
+                                                                <Ripples onClick={()=>handleDeleteSubcategory(subcategory)}>
+                                                                {/* <Ripples> */}
+                                                                    <FiTrash size={16} />
+                                                                </Ripples>
+                                                            </button>
+                                                        </ToggleSubcategory>
+                                                    </ToggleSubcategoryContainer>
+                                                </li>
+                                            ))
                                         }
-                                        <TaskTitle>
-                                            <span><FaRegClock size={12} />{task.time}</span>
-                                            <h3>{task.title}</h3>
-                                        </TaskTitle>
-                                    </div>
-                                    <div>
-                                        <button>
-                                            <Ripples onClick={()=>handleToggleTask(task)}>
-                                                <FaEllipsisV size={16} />
-                                            </Ripples>
-                                        </button>
-                                        <ToggleTask isActive={toggleTask.id === task.id ? true : false}>
-                                            <button>
-                                                <Ripples onClick={()=>handleCompleteTask(task)}>
-                                                    {task.completed ? 'Reativar': 'Completar'}
-                                                </Ripples>
-                                            </button>                                            <button>
-                                                <Ripples onClick={()=>handleEditTask(task)}>
-                                                    Editar
-                                                </Ripples>
-                                            </button>
-                                            <button>
-                                                <Ripples onClick={()=>handleDelete(task)}>
-                                                    Deletar
-                                                </Ripples>
-                                            </button>
-                                        </ToggleTask>
-                                    </div>
-                                    <TaskCompletedMessage isCompleted={task.completed}>
-                                        <FaCheckSquare size={24} /> Completa
-                                    </TaskCompletedMessage>
-                                </Task>
+                                        <ButtonPlusSubcategory>
+                                            <RippleEffect onClick={()=>handleNewSubcategory(category)}>
+                                                <FiPlus size={24} />
+                                            </RippleEffect>
+                                        </ButtonPlusSubcategory>                 
+                                    </Subcategory>
+
+                                </Category>
                             ))
                         }
-                    </Tasks>
-                </Center>
+                    </div>
+                    <ButtonPlusCategory>
+                        <RippleEffect onClick={handleNewCategory}>
+                            <FiPlus size={16} /> Adicionar categoria
+                        </RippleEffect>
+                    </ButtonPlusCategory>                 
+                </SideBar>
+                
+                <Tasks tasks={tasks} setTasks={setTasks} categories={categories} selectedDate={selectedDate} />
+                
                 <RightBar>
                     <Calendar>
                         <DatePicker 
