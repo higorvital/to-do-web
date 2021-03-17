@@ -228,8 +228,6 @@ const Tasks: React.FC<TaskProps> = ({tasks, setTasks,categories, selectedDate}) 
     const updateTask = useCallback(async (task)=>{
 
         try {
-
-            console.log(task.subcategory_id);
             
             const response = await api.put(`/tasks/${task.id}`, {
                 title: task.title,
@@ -278,7 +276,9 @@ const Tasks: React.FC<TaskProps> = ({tasks, setTasks,categories, selectedDate}) 
             isOpen={isTaskModalOpen} 
             toggleModal={toggleTaskModal} 
             createTask={createTask} 
-            updateTask={updateTask} />
+            updateTask={updateTask}
+            selectedDate={selectedDate}
+            />
 
         <Center>
             <Title>

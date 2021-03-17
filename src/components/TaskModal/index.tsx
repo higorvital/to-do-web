@@ -13,7 +13,7 @@ import 'react-clock/dist/Clock.css';
 
 import { InputTimePicker } from './styles';
 import { FaRegClock } from 'react-icons/fa';
-import { format } from 'date-fns';
+import { format, isBefore } from 'date-fns';
 
 import Modal from '../Modal';
 import { toast } from 'react-toastify';
@@ -48,12 +48,13 @@ interface TaskModalProps{
     task: Task | null;
     categories: Category[];
     isOpen: boolean;
+    selectedDate: Date;
     toggleModal(open: boolean): void;
     createTask(task: Task): void;
     updateTask(task: Task): void;
 }
 
-const TaskModal: React.FC<TaskModalProps> = ({task, isOpen, toggleModal, createTask, updateTask, categories}) => {
+const TaskModal: React.FC<TaskModalProps> = ({task, isOpen, toggleModal, createTask, updateTask, categories, selectedDate}) => {
 
     const formRef = useRef<FormHandles>(null);
     const [useTime, setUseTime] = useState(true);
@@ -88,17 +89,26 @@ const TaskModal: React.FC<TaskModalProps> = ({task, isOpen, toggleModal, createT
             abortEarly: true
           });
 
+          data.year = Number(formDate.split('-')[0]);
+          data.month = Number(formDate.split('-')[1]);
+          data.day = Number(formDate.split('-')[2]);
+
+          let dateToCompare = new Date(data.year, data.month - 1, data.day);
+
           if(!useTime){
             delete data.hour;
             delete data.minute;
           }else {
             data.hour = Number(formTime.split(':')[0]);
             data.minute = Number(formTime.split(':')[1]);
+
+            dateToCompare.setHours(data.hour);
+            dateToCompare.setMinutes(data.minute)
           }
           
-          data.year = Number(formDate.split('-')[0]);
-          data.month = Number(formDate.split('-')[1]);
-          data.day = Number(formDate.split('-')[2]);
+          if(isBefore(dateToCompare, new Date())){
+            throw Error("Data e hora inválidos");
+          }
 
           if(selectedSubcategory){
             data.subcategory_id = selectedSubcategory.id
@@ -113,6 +123,10 @@ const TaskModal: React.FC<TaskModalProps> = ({task, isOpen, toggleModal, createT
           }
 
           toggleModal(false);
+          formRef.current?.reset();
+          setFormTime(`${format(new Date(),'HH:mm')}`);
+          setFormDate(`${format(new Date(),'yyyy-MM-dd')}`);
+          setSelectedCategory(undefined)
     
         } catch (err) {
     
@@ -149,17 +163,6 @@ const TaskModal: React.FC<TaskModalProps> = ({task, isOpen, toggleModal, createT
       setSelectedCategory(undefined);
     }
 
-    // if(task){
-      
-    //   setSelectedSubcategory(task.subcategory);
-
-    // }else{
-    //   setSelectedSubcategory(undefined);
-
-    // }
-
-
-
   },[task]);
 
   useEffect(()=>{
@@ -192,8 +195,6 @@ const TaskModal: React.FC<TaskModalProps> = ({task, isOpen, toggleModal, createT
 
     setSelectedCategory(category);
 
-    console.log("category: "+selectedSubcategory)
-
     if(category){
 
       setSubcategories(category.subcategories);
@@ -203,7 +204,7 @@ const TaskModal: React.FC<TaskModalProps> = ({task, isOpen, toggleModal, createT
       setSubcategories([]);
     }
 
-  },[categories, selectedSubcategory]);
+  },[categories]);
 
   const handleSubcategoryChange = useCallback((event)=>{
 
@@ -212,6 +213,12 @@ const TaskModal: React.FC<TaskModalProps> = ({task, isOpen, toggleModal, createT
     setSelectedSubcategory(subcategory);
 
   },[subcategories]);
+
+  useEffect(()=>{
+
+    setFormDate(`${format(selectedDate,'yyyy-MM-dd')}`);
+
+  },[selectedDate])
 
   return (
       <Modal isOpen={isOpen} toggleModal={toggleModal} >
