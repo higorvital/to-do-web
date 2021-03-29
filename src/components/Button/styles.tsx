@@ -10,4 +10,11 @@ export const Container = styled.button`
     font-weight: 500;
     margin: 15px auto 0;
     min-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        margin-right: 10px;
+    }
 `;

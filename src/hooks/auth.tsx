@@ -11,7 +11,7 @@ interface User {
 
 interface AuthContextData{
     user: User;
-    signIn(email: string, password: string): void;
+    signIn(email: string, password: string): Promise<void>;
     signOut(): void;
     updateUser(user: User): void;
 }
@@ -29,18 +29,18 @@ const AuthProvider: React.FC = ({children}) => {
 
         const token = localStorage.getItem('@2Do:token');
         const user = localStorage.getItem('@2Do:user');
-        const lastAccess = localStorage.getItem('@2Do:lastAccess');
+        const lastLogin = localStorage.getItem('@2Do:lastLogin');
 
-        if(token && user && lastAccess){
+        if(token && user && lastLogin){
 
-            let lastAccessParsed = parseISO(JSON.parse(lastAccess));
-            lastAccessParsed = addHours(lastAccessParsed, 24);
+            let lastLoginParsed = parseISO(JSON.parse(lastLogin));
+            lastLoginParsed = addHours(lastLoginParsed, 24);
 
-            if(isAfter(new Date(), lastAccessParsed)){
+            if(isAfter(new Date(), lastLoginParsed)){
 
                 localStorage.removeItem('@2Do:token');
                 localStorage.removeItem('@2Do:user');
-                localStorage.removeItem('@2Do:lastAccess');
+                localStorage.removeItem('@2Do:lastLogin');
 
                 return {} as AuthState;
             }
@@ -68,7 +68,7 @@ const AuthProvider: React.FC = ({children}) => {
 
         api.defaults.headers.authorization = `Bearer ${token}`;
 
-        localStorage.setItem('@2Do:lastAccess', JSON.stringify(new Date()));
+        localStorage.setItem('@2Do:lastLogin', JSON.stringify(new Date()));
         localStorage.setItem('@2Do:token', JSON.stringify(token));
         localStorage.setItem('@2Do:user', JSON.stringify(user));
 
@@ -80,7 +80,7 @@ const AuthProvider: React.FC = ({children}) => {
 
         localStorage.removeItem('@2Do:token');
         localStorage.removeItem('@2Do:user');
-        localStorage.removeItem('@2Do:lastAccess');
+        localStorage.removeItem('@2Do:lastLogin');
 
         setData({} as AuthState);
     },[]);

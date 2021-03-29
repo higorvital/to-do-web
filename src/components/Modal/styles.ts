@@ -46,29 +46,3 @@ export const AnimatedContent = styled.div`
     justify-content: center;
 
 `
-
-export const Content = styled.div`
-
-    background: #fff;
-    width: 100%;
-    max-width: 400px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 50px;
-    box-shadow: 0px 0px 8px #00000014;
-    border-radius: 8px;
-
-    h1 {
-        margin-bottom: 20px;
-    }
-
-    form {
-        width: 100%;
-        max-width: 300px;
-        display: flex;
-        flex-direction: column;
-    }
-
-`

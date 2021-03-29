@@ -4,6 +4,7 @@ import {FiLock, FiMail} from 'react-icons/fi';
 import {Form} from '@unform/web';
 import {FormHandles} from '@unform/core';
 import * as Yup from 'yup';
+import getValidationErrors from '../../utils/getValidationErrors';
 
 import { Container, Content, Background, ContentBox, AnimatedContent} from './styles';
 import Button from '../../components/Button';
@@ -37,14 +38,26 @@ const SignIn: React.FC = () => {
 
       const {email, password} = data;
 
-      signIn(email, password);
+      await signIn(email, password);
 
     } catch (err) {
 
-      toast(err.message, {
-        autoClose: 3000,
-        type: "error"
-      });
+
+        if(err instanceof Yup.ValidationError){
+            const errors = getValidationErrors(err);
+
+            formRef.current?.setErrors(errors);
+
+            return;
+
+        }
+
+        const errorMessage = err?.response?.data?.message ?  err?.response?.data?.message : "Erro na autenticação, tente novamente";
+
+        toast(errorMessage, {
+          autoClose: 3000,
+          type: "error"
+        });
 
     }
 

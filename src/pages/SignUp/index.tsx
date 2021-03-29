@@ -10,6 +10,7 @@ import Button from '../../components/Button';
 import api from '../../services/api';
 import { useHistory } from 'react-router';
 import { toast } from 'react-toastify';
+import getValidationErrors from '../../utils/getValidationErrors';
 
 interface SignUpCredentials{
   name: string;
@@ -46,11 +47,23 @@ const SignUp: React.FC = () => {
 
     } catch (err) {
 
+      if(err instanceof Yup.ValidationError){
+        
+        const errors = getValidationErrors(err);
 
-      toast(err.message, {
+        formRef.current?.setErrors(errors);
+
+        return;
+
+      }
+
+      const errorMessage = err?.response?.data?.message ?  err?.response?.data?.message : "Erro na autenticação, tente novamente";
+
+      toast(errorMessage, {
         autoClose: 3000,
         type: "error"
       });
+
     }
 
   },[history]);
@@ -61,7 +74,7 @@ const SignUp: React.FC = () => {
         <Content>
           <AnimatedContent>
             <ContentBox>
-              <h1>Criar sua contaa</h1>
+              <h1>Criar sua conta</h1>
 
               <Form ref={formRef} onSubmit={handleSubmit}>
                 <Input icon={FiUser} type="name" name="name" placeholder="Nome" />

@@ -7,7 +7,7 @@ import {AuthProvider} from './auth';
 const AppProvider: React.FC = ({children}) => {
   return (
       <AuthProvider>
-          {children}
+        {children}
       </AuthProvider>
   );
 }
