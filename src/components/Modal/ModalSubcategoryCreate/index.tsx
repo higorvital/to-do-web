@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import Modal from '..';
 import * as Yup from 'yup';
 import {Form} from '@unform/web';
@@ -86,6 +86,14 @@ const ModalSubcategoryCreate: React.FC<ModalSubcategoryCreateProps> = ({category
     
       },[category, editCategory, toggleModal]);
 
+      useEffect(()=>{
+
+        if(!isOpen){
+          formRef.current?.reset();
+        }
+
+      },[isOpen]);
+
     return (
         <Modal isOpen={isOpen} toggleModal={toggleModal}>
             <Container>
@@ -98,7 +106,7 @@ const ModalSubcategoryCreate: React.FC<ModalSubcategoryCreateProps> = ({category
                           <Input type="text" name="name" placeholder="Título" />                    
                       </FormContent>
                       <Actions>
-                          <CancelButton type="button">
+                          <CancelButton type="button" onClick={toggleModal}>
                               Cancelar
                           </CancelButton>
                           <CreateButton type="submit">

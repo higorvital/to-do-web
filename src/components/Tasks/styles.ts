@@ -36,6 +36,8 @@ export const Box = styled.div`
     display: flex;
     flex: 1;
     flex-direction: column;
+    max-height: 100%;
+    overflow: hidden;
 `
 
 export const TaskList = styled.div`
@@ -44,6 +46,8 @@ export const TaskList = styled.div`
     flex-direction: column;
     padding: 10px;
     overflow-y: auto;
+    max-height: 100%;
+    margin: 2px 2px;
 
     ::-webkit-scrollbar {
         width: 5px;

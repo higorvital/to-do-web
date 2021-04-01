@@ -25,7 +25,7 @@ import {
 } from './styles';
 import { FaChevronDown } from 'react-icons/fa';
 import ITask from '../../dtos/ITask';
-import { parseISO } from 'date-fns/esm';
+import { isBefore, parseISO } from 'date-fns/esm';
 import api from '../../services/api';
 import ModalCategorySelect from '../Modal/ModalCategorySelect';
 import ModalSubcategorySelect from '../Modal/ModalSubcategorySelect';
@@ -346,6 +346,27 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({modal = false, task, editTask,
 
 
     },[task]);
+
+    const isTaskLate = useMemo(()=>{
+
+      const dateFormatted = parseISO(task.date);
+
+      const currentDate = new Date();
+
+      if(!task.time){
+          currentDate.setHours(0,0,0,0);
+      }else{
+
+          let taskTime = task.time.split(':');
+          dateFormatted.setHours(Number(taskTime[0]), Number(taskTime[1]));
+      }
+
+      console.log("dateFormatted: "+dateFormatted);
+      console.log("currentDate: "+currentDate);
+
+      return isBefore(dateFormatted, currentDate);
+
+  },[task.date, task.time]);
   
     return (
       <>
@@ -389,7 +410,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({modal = false, task, editTask,
                             <Input defaultValue={task.title} type="text" name="title" />
                         </Form>
                     </TaskTitle>
-                    <TaskDateTime>
+                    <TaskDateTime isTaskLate={isTaskLate}>
                       <ItemTitle>Escolha uma data e horário</ItemTitle>
                       <button onClick={toggleModalDateTimeOpen}>
                         <span>

@@ -24,7 +24,7 @@ const Calendar: React.FC<CalendarProps> = ({selectedDate, setSelectedDate}) => {
         <Container>
             <DatePicker 
                 weekdaysShort = {['D','S','T','Q','Q','S','S']}
-                fromMonth={new Date()}
+                // fromMonth={new Date()}
                 // disabledDays={[{daysOfWeek: [0,6]}, ...disabledDays]}
                 modifiers={{
                     available: { daysOfWeek: [0,1,2,3,4,5,6]}

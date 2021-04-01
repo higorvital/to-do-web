@@ -103,8 +103,11 @@ export const BoxContent = styled.div<BoxContentProps>`
 export const TaskTitle = styled.div`
 
 `
+interface TaskDateTimeProps{
+    isTaskLate: boolean;
+}
 
-export const TaskDateTime = styled.div`
+export const TaskDateTime = styled.div<TaskDateTimeProps>`
     margin-top: 20px;
 
     button {
@@ -116,6 +119,12 @@ export const TaskDateTime = styled.div`
         padding: 10px 15px;
         font-size: 12px;
         border-radius: 8px;
+
+        span {
+            ${props => props.isTaskLate && css`
+            color: red;
+            `}
+        }
 
         &:hover{
             border-color: #4176f5;

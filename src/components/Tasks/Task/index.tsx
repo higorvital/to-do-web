@@ -3,7 +3,7 @@ import { FaCheck, FaTimes } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import api from '../../../services/api';
 import ITask from '../../../dtos/ITask';
-import {format} from 'date-fns';
+import {format, isBefore, parseISO} from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 import { 
@@ -118,6 +118,29 @@ const Task: React.FC<TaskProps> = ({ openModal = true, setCurrentTask, task, edi
 
     },[openModal, setCurrentTask, task, toggleModalTaskEditOpen]);
 
+    const isTaskLate = useMemo(()=>{
+
+        const dateFormatted = parseISO(task.date);
+
+        const currentDate = new Date();
+
+        if(!task.time){
+            currentDate.setHours(0,0,0,0);
+        }else{
+
+            let taskTime = task.time.split(':');
+            dateFormatted.setHours(Number(taskTime[0]), Number(taskTime[1]));
+        }
+
+        console.log("dateFormatted: "+dateFormatted);
+        console.log("currentDate: "+currentDate);
+
+        return isBefore(dateFormatted, currentDate);
+  
+    },[task.date, task.time]);
+  
+  
+
     return (
         <>  
             <ModalTaskEdit 
@@ -132,7 +155,7 @@ const Task: React.FC<TaskProps> = ({ openModal = true, setCurrentTask, task, edi
                 <Checked completed={task.completed} onClick={handleComplete}>
                     <FaCheck size={12} />
                 </Checked>
-                <TaskContent completed={task.completed} onClick={handleClickTask}>
+                <TaskContent completed={task.completed} isLate={isTaskLate} onClick={handleClickTask}>
                     <h4>{task.title}</h4>
                     <p> {task.subcategory ? `${task.subcategory.name} | `: ''}{taskDateTimeFormatted}</p>
                 </TaskContent>

@@ -104,7 +104,6 @@ const Tasks: React.FC<TasksProps> = ({tasks, title, addNewTask, subcategory, set
 
     },[subcategory]);
 
-
     return (
       <Container>
             <Title>

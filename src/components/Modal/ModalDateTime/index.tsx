@@ -80,7 +80,7 @@ const ModalDateTime: React.FC<ModalDateTimeProps> = ({task ,isOpen, toggleModal,
             time: taskTime
           };
 
-          const response = await api.put<ITask>(`/tasks/${task.id}`, {
+          const response = await api.patch<ITask>(`/tasks/${task.id}/date-time`, {
             ...dateTime
           });
 

@@ -55,6 +55,7 @@ export const Checked = styled.button<CheckedProps>`
 
 interface TaskContentProps {
     completed: boolean;
+    isLate: boolean;
 }
 
 export const TaskContent = styled.button<TaskContentProps>`
@@ -86,6 +87,10 @@ export const TaskContent = styled.button<TaskContentProps>`
 
     h4 {
         color: #000;
+
+        ${props => props.isLate && css`
+            color: red;   
+        `}
 
         ${props => props.completed && css`
             color: #d8d8d8;   
