@@ -8,9 +8,9 @@ Aplicativo que permite a criação e gerenciamento de tarefas do usuário
 
 ### Built With
 
-* [ReactJS](https://reactjs.org)
-* [Node.js](https://nodejs.org)
-
+![Typescript](https://img.shields.io/badge/-Typescript-0085d2?style=flat-square&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/-React.js-45b8d8?style=flat-square&logo=react&logoColor=white)
+![Nodejs](https://img.shields.io/badge/-Node.js-43853d?style=flat-square&logo=Node.js&logoColor=white)
 
 
 ## To be done
