@@ -2,7 +2,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-| ![home image](https://github.com/higorvital/to-do-web/blob/main/images/home.png) | ![modal image](https://github.com/higorvital/to-do-web/blob/main/images/modal-tarefa.png)  |
+
+|  ![home image](https://github.com/higorvital/to-do-web/blob/main/images/home.png)   | ![modal image](https://github.com/higorvital/to-do-web/blob/main/images/modal-tarefa.png) |
+| ---    | ---       |
 
 Aplicativo que permite a criação e gerenciamento de tarefas do usuário
 
