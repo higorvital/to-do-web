@@ -70,7 +70,6 @@ const ModalTaskCreate: React.FC<ModalTaskCreateProps> = ({isOpen, toggleModal, c
 
     const handleSubmit = useCallback(async (data)=>{
 
-
         formRef.current?.setErrors({});
     
         try {
@@ -85,36 +84,45 @@ const ModalTaskCreate: React.FC<ModalTaskCreateProps> = ({isOpen, toggleModal, c
             abortEarly: true
           });
 
-          if(data.time){
+          const {date, subcategory_id} = data;
 
-            const schemaTime = Yup.object().shape({
-              time: Yup.string().test((time)=>moment(time, 'HH:mm').isValid()),
-            });
-
-            await schemaTime.validate(data, {
-              abortEarly: true
-            });
-
+          if(!date && !subcategory_id){
+            throw new Error("Escolha uma Data ou Subcategoria");
           }
-          
+
           let taskTime;
+          let dateTime;
 
-          if(data.time){
-            taskTime = {
-              hour: Number(data.time.split(':')[0]),
-              minute: Number(data.time.split(':')[1]),
+          if(data.date){
+  
+            if(data.time){
+  
+              const schemaTime = Yup.object().shape({
+                time: Yup.string().test((time)=>moment(time, 'HH:mm').isValid()),
+              });
+  
+              await schemaTime.validate(data, {
+                abortEarly: true
+              });
+  
+              taskTime = {
+                hour: Number(data.time.split(':')[0]),
+                minute: Number(data.time.split(':')[1]),
+              }
+  
             }
+
+            dateTime = {
+              date: {
+                year: Number(data.date.split('-')[0]),
+                month: Number(data.date.split('-')[1]),
+                day: Number(data.date.split('-')[2])    
+              },
+              time: taskTime
+            };
           }
 
-          let dateTime = {
-            date: {
-              year: Number(data.date.split('-')[0]),
-              month: Number(data.date.split('-')[1]),
-              day: Number(data.date.split('-')[2])    
-            },
-            time: taskTime
-          };
-
+          
           console.log({
             ...data,
             ...dateTime,

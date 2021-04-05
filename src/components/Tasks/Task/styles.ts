@@ -97,6 +97,7 @@ export const TaskContent = styled.button<TaskContentProps>`
         `}
         font-size: 14px;
         font-weight: 400;
+        text-align: initial;
     }
 
     p {

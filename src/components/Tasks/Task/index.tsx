@@ -15,7 +15,6 @@ import {
 import ModalTaskEdit from '../../Modal/ModalTaskEdit';
 import ICategory from '../../../dtos/ICategory';
 
-
 interface TaskProps {
     task: ITask;
     categories: ICategory[];
@@ -85,26 +84,31 @@ const Task: React.FC<TaskProps> = ({ openModal = true, setCurrentTask, task, edi
 
     const taskDateTimeFormatted = useMemo(()=>{
 
-        let date = task.date.split("-");
-
-        let taskDate = new Date(Number(date[0]), Number(date[1]) - 1, Number(date[2]));
-
-        let dateFormat;
-        
-        if(task.time){
-            let time = task.time.split(":");
-
-            taskDate.setHours(Number(time[0]));
-            taskDate.setMinutes(Number(time[1]));
-
-            dateFormat = "HH:mm"
-        }else{
-            dateFormat = "dd 'de' MMMM 'de' yyyy";
+        if(task.date){
+    
+            let date = task.date.split("-");
+    
+            let taskDate = new Date(Number(date[0]), Number(date[1]) - 1, Number(date[2]));
+    
+            let dateFormat;
+            
+            if(task.time){
+                let time = task.time.split(":");
+    
+                taskDate.setHours(Number(time[0]));
+                taskDate.setMinutes(Number(time[1]));
+    
+                dateFormat = "HH:mm"
+            }else{
+                dateFormat = "dd 'de' MMMM 'de' yyyy";
+            }
+    
+            return format(taskDate, dateFormat, {
+                locale: ptBR
+            })
         }
 
-        return format(taskDate, dateFormat, {
-            locale: ptBR
-        })
+        return;
 
     },[task.date, task.time]);
 
@@ -120,26 +124,30 @@ const Task: React.FC<TaskProps> = ({ openModal = true, setCurrentTask, task, edi
 
     const isTaskLate = useMemo(()=>{
 
-        const dateFormatted = parseISO(task.date);
+        if(task.date){
+                        
+            const dateFormatted = parseISO(task.date);
+    
+            const currentDate = new Date();
+    
+            if(!task.time){
+                currentDate.setHours(0,0,0,0);
+            }else{
+    
+                let taskTime = task.time.split(':');
+                dateFormatted.setHours(Number(taskTime[0]), Number(taskTime[1]));
+            }
+    
+            console.log("dateFormatted: "+dateFormatted);
+            console.log("currentDate: "+currentDate);
+    
+            return isBefore(dateFormatted, currentDate) && !task.completed;
 
-        const currentDate = new Date();
-
-        if(!task.time){
-            currentDate.setHours(0,0,0,0);
-        }else{
-
-            let taskTime = task.time.split(':');
-            dateFormatted.setHours(Number(taskTime[0]), Number(taskTime[1]));
         }
 
-        console.log("dateFormatted: "+dateFormatted);
-        console.log("currentDate: "+currentDate);
-
-        return isBefore(dateFormatted, currentDate);
+        return false;
   
-    },[task.date, task.time]);
-  
-  
+    },[task.date, task.time, task.completed]);
 
     return (
         <>  
@@ -157,7 +165,7 @@ const Task: React.FC<TaskProps> = ({ openModal = true, setCurrentTask, task, edi
                 </Checked>
                 <TaskContent completed={task.completed} isLate={isTaskLate} onClick={handleClickTask}>
                     <h4>{task.title}</h4>
-                    <p> {task.subcategory ? `${task.subcategory.name} | `: ''}{taskDateTimeFormatted}</p>
+                    <p> {task.subcategory ? `${task.subcategory.name} ${taskDateTimeFormatted ? '|' : ''} `: ''}{taskDateTimeFormatted}</p>
                 </TaskContent>
                 {
                     task.completed &&

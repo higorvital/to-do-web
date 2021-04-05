@@ -166,8 +166,17 @@ export const ItemTitle = styled.h4`
 `
 export const Description = styled.div`
     margin-top: 20px;
+    position: relative;
 
 `
+export const ButtonDescription = styled.button`
+
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    
+`
+
 export const CreatedAt = styled.div`
 
     margin-top: 20px;

@@ -1,19 +1,17 @@
 import { useField } from '@unform/core';
-import React, { InputHTMLAttributes, useCallback, useEffect, useRef, useState } from 'react';
-import {IconBaseProps} from 'react-icons';
+import React, { TextareaHTMLAttributes, useCallback, useEffect, useRef, useState } from 'react';
 import { FiAlertCircle } from 'react-icons/fi';
 
 import { Container, Error } from './styles';
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
     name: string;
-    icon?: React.ComponentType<IconBaseProps>;
     triggerOnBlur?(): void;
 }
 
-const Input: React.FC<InputProps> = ({name,type, triggerOnBlur, icon: Icon, ...rest}) => {
+const Textarea: React.FC<TextareaProps> = ({name,triggerOnBlur, ...rest}) => {
 
-    const inputRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isFocused, setFocused] = useState(false);
     const [isFilled, setFilled] = useState(false);
 
@@ -22,7 +20,7 @@ const Input: React.FC<InputProps> = ({name,type, triggerOnBlur, icon: Icon, ...r
     useEffect(()=>{
         registerField({
             name: fieldName,
-            ref: inputRef.current,
+            ref: textareaRef.current,
             path: 'value'
         })
 
@@ -38,23 +36,22 @@ const Input: React.FC<InputProps> = ({name,type, triggerOnBlur, icon: Icon, ...r
 
         setFocused(false);
 
-        setFilled(!! inputRef.current?.value);
+        setFilled(!! textareaRef.current?.value);
 
         triggerOnBlur && triggerOnBlur();
 
     },[triggerOnBlur]);
 
     return (
-        <Container isFocused={isFocused} isFilled={isFilled} isErrored={!!error} hidden={type === "hidden" ? true : false} >
-            {Icon && <Icon size={20} />}
-            <input 
+        <Container isFocused={isFocused} isFilled={isFilled} isErrored={!!error}>
+            <textarea
                 defaultValue={defaultValue}
-                ref={inputRef}
+                ref={textareaRef}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                type={type}
                 {...rest} 
             />
+
             {error && 
                 <Error title={error}>
                   <FiAlertCircle size={20} color='#c53030'/>
@@ -64,4 +61,4 @@ const Input: React.FC<InputProps> = ({name,type, triggerOnBlur, icon: Icon, ...r
     );
 }
 
-export default Input;
+export default Textarea;

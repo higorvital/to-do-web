@@ -1,5 +1,4 @@
-import { isAfter, parseISO } from 'date-fns';
-import { addHours } from 'date-fns/esm';
+import { addDays, isAfter, parseISO } from 'date-fns';
 import React, {createContext, useCallback, useContext, useState} from 'react';
 import api from '../services/api';
 
@@ -34,7 +33,7 @@ const AuthProvider: React.FC = ({children}) => {
         if(token && user && lastLogin){
 
             let lastLoginParsed = parseISO(JSON.parse(lastLogin));
-            lastLoginParsed = addHours(lastLoginParsed, 24);
+            lastLoginParsed = addDays(lastLoginParsed, 7);
 
             if(isAfter(new Date(), lastLoginParsed)){
 

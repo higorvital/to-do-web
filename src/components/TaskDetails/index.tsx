@@ -32,6 +32,7 @@ import ModalSubcategorySelect from '../Modal/ModalSubcategorySelect';
 import ICategory from '../../dtos/ICategory';
 import ISubcategory from '../../dtos/ISubcategory';
 import ModalDateTime from '../Modal/ModalDateTime';
+import Textarea from '../Textarea';
 
 interface TaskDetailsProps{
   modal?: boolean;
@@ -309,29 +310,36 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({modal = false, task, editTask,
 
     const taskDateTimeFormatted = useMemo(()=>{
 
-      let date = task.date.split("-");
+      if(task.date){
 
-      let taskDate = new Date(Number(date[0]), Number(date[1]) - 1, Number(date[2]));
-
-      let dateFormat;
-      
-      if(task.time){
-          let time = task.time.split(":");
-
-          taskDate.setHours(Number(time[0]));
-          taskDate.setMinutes(Number(time[1]));
-
-          dateFormat = "HH:mm - dd 'de' MMMM 'de' yyyy";
-
-      }else{
-          
-          dateFormat = "dd 'de' MMMM 'de' yyyy";;
+        let date = task.date.split("-");
+  
+        let taskDate = new Date(Number(date[0]), Number(date[1]) - 1, Number(date[2]));
+  
+        let dateFormat;
+        
+        if(task.time){
+            let time = task.time.split(":");
+  
+            taskDate.setHours(Number(time[0]));
+            taskDate.setMinutes(Number(time[1]));
+  
+            dateFormat = "HH:mm - dd 'de' MMMM 'de' yyyy";
+  
+        }else{
+            
+            dateFormat = "dd 'de' MMMM 'de' yyyy";;
+  
+        }
+  
+        return format(taskDate, dateFormat, {
+            locale: ptBR
+        })
 
       }
 
-      return format(taskDate, dateFormat, {
-          locale: ptBR
-      })
+      return;
+
 
     },[task.date, task.time]);
 
@@ -349,24 +357,26 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({modal = false, task, editTask,
 
     const isTaskLate = useMemo(()=>{
 
-      const dateFormatted = parseISO(task.date);
+      if(task.date){
 
-      const currentDate = new Date();
-
-      if(!task.time){
-          currentDate.setHours(0,0,0,0);
-      }else{
-
-          let taskTime = task.time.split(':');
-          dateFormatted.setHours(Number(taskTime[0]), Number(taskTime[1]));
+        const dateFormatted = parseISO(task.date);
+  
+        const currentDate = new Date();
+  
+        if(!task.time){
+            currentDate.setHours(0,0,0,0);
+        }else{
+  
+            let taskTime = task.time.split(':');
+            dateFormatted.setHours(Number(taskTime[0]), Number(taskTime[1]));
+        }
+    
+        return isBefore(dateFormatted, currentDate) && !task.completed;
       }
+      return false;
 
-      console.log("dateFormatted: "+dateFormatted);
-      console.log("currentDate: "+currentDate);
 
-      return isBefore(dateFormatted, currentDate);
-
-  },[task.date, task.time]);
+  },[task.date, task.time, task.completed]);
   
     return (
       <>
@@ -407,14 +417,14 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({modal = false, task, editTask,
                 <BoxContent completed={task.completed}>
                     <TaskTitle>
                         <Form ref={titleFormRef} onSubmit={handleSubmitTitle}>
-                            <Input defaultValue={task.title} type="text" name="title" />
+                            <Input defaultValue={task.title} type="text" name="title" triggerOnBlur={()=>titleFormRef.current?.submitForm()}/>
                         </Form>
                     </TaskTitle>
                     <TaskDateTime isTaskLate={isTaskLate}>
                       <ItemTitle>Escolha uma data e horário</ItemTitle>
                       <button onClick={toggleModalDateTimeOpen}>
                         <span>
-                          {taskDateTimeFormatted}
+                          {taskDateTimeFormatted ? taskDateTimeFormatted : 'dd/mm/yyyy'}
                         </span>
                       </button>
                     </TaskDateTime>
@@ -428,7 +438,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({modal = false, task, editTask,
                     <Description>
                       <ItemTitle>Descrição</ItemTitle>
                       <Form ref={descriptionFormRef} onSubmit={handleSubmitDescription}>
-                        <Input type="text" name="description" placeholder="Escreva uma descrição" defaultValue={task.description} />
+                        {/* <Input type="text" name="description" placeholder="Escreva uma descrição" defaultValue={task.description} /> */}
+                        <Textarea rows={6} name="description" placeholder="Escreva uma descrição" defaultValue={task.description} triggerOnBlur={()=>descriptionFormRef.current?.submitForm()}/>
                       </Form>
                     </Description>
                     <CreatedAt>

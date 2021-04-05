@@ -63,6 +63,11 @@ const Tasks: React.FC<TasksProps> = ({tasks, title, addNewTask, subcategory, set
             }
           });
 
+        }else if(subcategory) {
+          response = await api.post<ITask>('/tasks', {
+            ...data,
+            subcategory_id: subcategory.id
+          });
         }else {
           throw new Error("Erro ao adicionar subcategoria");
         }
@@ -96,7 +101,7 @@ const Tasks: React.FC<TasksProps> = ({tasks, title, addNewTask, subcategory, set
   
       }
   
-    },[addNewTask, selectedDate]);
+    },[addNewTask, selectedDate, subcategory]);
 
     const openModal = useMemo(()=>{
       
@@ -128,7 +133,7 @@ const Tasks: React.FC<TasksProps> = ({tasks, title, addNewTask, subcategory, set
                   }
                 </TaskList>
                 {
-                  !subcategory && (
+                  (
                     <TaskForm>
                         <Form ref={formRef} onSubmit={handleSubmit}>
                             <Input type="text" name="title" placeholder="Adicione uma nova tarefa" />
