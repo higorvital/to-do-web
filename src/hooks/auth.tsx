@@ -28,21 +28,23 @@ const AuthProvider: React.FC = ({children}) => {
 
         const token = localStorage.getItem('@2Do:token');
         const user = localStorage.getItem('@2Do:user');
-        const lastLogin = localStorage.getItem('@2Do:lastLogin');
+        const lastAccess = localStorage.getItem('@2Do:lastAccess');
 
-        if(token && user && lastLogin){
+        if(token && user && lastAccess){
 
-            let lastLoginParsed = parseISO(JSON.parse(lastLogin));
-            lastLoginParsed = addDays(lastLoginParsed, 7);
+            let lastAccessParsed = parseISO(JSON.parse(lastAccess));
+            lastAccessParsed = addDays(lastAccessParsed, 2);
 
-            if(isAfter(new Date(), lastLoginParsed)){
+            if(isAfter(new Date(), lastAccessParsed)){
 
                 localStorage.removeItem('@2Do:token');
                 localStorage.removeItem('@2Do:user');
-                localStorage.removeItem('@2Do:lastLogin');
+                localStorage.removeItem('@2Do:lastAccess');
 
                 return {} as AuthState;
             }
+
+            localStorage.setItem('@2Do:lastAccess', JSON.stringify(new Date()));
 
             api.defaults.headers.authorization = `Bearer ${JSON.parse(token)}`;
 
@@ -67,7 +69,7 @@ const AuthProvider: React.FC = ({children}) => {
 
         api.defaults.headers.authorization = `Bearer ${token}`;
 
-        localStorage.setItem('@2Do:lastLogin', JSON.stringify(new Date()));
+        localStorage.setItem('@2Do:lastAccess', JSON.stringify(new Date()));
         localStorage.setItem('@2Do:token', JSON.stringify(token));
         localStorage.setItem('@2Do:user', JSON.stringify(user));
 
@@ -79,7 +81,7 @@ const AuthProvider: React.FC = ({children}) => {
 
         localStorage.removeItem('@2Do:token');
         localStorage.removeItem('@2Do:user');
-        localStorage.removeItem('@2Do:lastLogin');
+        localStorage.removeItem('@2Do:lastAccess');
 
         setData({} as AuthState);
     },[]);
